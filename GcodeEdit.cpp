@@ -45,14 +45,21 @@ void GcodeEdit::compilegcode()
 {
     qDebug()<<"this is in functuin GcodeEdit::compilegcode() begin";
     int blocknum=0;
-    while(blocknum<=this->document()->blockCount())
+    bool compileok;
+    while(blocknum<this->document()->blockCount())
     {
-        qDebug()<<this->document()->findBlockByNumber(blocknum).text();
-        wordparse->ParseProcess(this->document()->findBlockByNumber(blocknum).text());
         qDebug()<<blocknum;
+        QVector<message> messagecomm;
+        qDebug()<<this->document()->findBlockByNumber(blocknum).text();
+        compileok=wordparse->ParseProcess(this->document()->findBlockByNumber(blocknum).text(),
+                                          messagecomm);
+        Arraymessage+=messagecomm;
         blocknum++;
     }
     qDebug()<<"this is in functuin GcodeEdit::compilegcode() end";
+    message msg;
+    foreach (msg, Arraymessage) {
 
 
+    }
 }

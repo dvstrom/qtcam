@@ -10,7 +10,9 @@ class GcodeParse : public QObject
     Q_OBJECT
 public:
     explicit GcodeParse(QObject *parent = 0);
-    void ParseProcess(QString strline);
+ //   QVector<message> ParseProcess(QString strline);
+    bool ParseProcess(QString strline,QVector<message>& mesvec);
+
     void HandleError(int errnum);
 signals:
 
@@ -19,7 +21,8 @@ public slots:
 private:
     bool abort;
     QString removeInvalid(QString line);
-    bool G00Parse(QString strline);
+//    message* G00Parse(QString strline);
+    bool G00Parse(QString strline,message &tempmsg);
     bool testRegexMatchx(QString testStr);
     bool testRegexMatchy(QString testStr);
     int  lcount(QString testStr);

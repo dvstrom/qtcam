@@ -702,20 +702,20 @@ MainWindow::MainWindow(QWidget *parent)
   void MainWindow::generategcode()
   {
       //原来程序
-      for (int i=0;i<holeVec.size();i++)
+      for (int i=1;i<holeVec.size();i++)
       {
           QString gcodetemp;
 
           //gcodetemp=QString("G00 X%1 Y%2 ").arg(QString::number(holeVec[i]->hx,'f',6)).arg(QString::number(holeVec[i]->hy,'f',6));
-          gcodetemp=QString("G00 X%1 Y%2 ").arg(QString::number(stepPulses(holeVec[i]->hx,setobj->leadx,setobj->xstepangle))).\
-                                                             arg(QString::number(stepPulses(holeVec[i]->hy,setobj->leady,setobj->ystepangle)));
+          gcodetemp=QString("G00 X%1 Y%2 ").arg(QString::number(stepPulses(holeVec[i]->hx-holeVec[i-1]->hx,setobj->leadx,setobj->xstepangle))).\
+                  arg(QString::number(stepPulses(holeVec[i]->hy-holeVec[i-1]->hy,setobj->leady,setobj->ystepangle)));
 
           qDebug()<<gcodetemp;
           textTop->appendPlainText(gcodetemp);
 
-          gcodetemp=QString("G20 R%1 S%2 A%3 L%4 D%5").arg(QString::number(holeVec[i]->hradius)).arg(0).arg(90).arg(1).arg(1);
-          qDebug()<<gcodetemp;
-          textTop->appendPlainText(gcodetemp);
+//          gcodetemp=QString("G20 R%1 S%2 A%3 L%4 D%5").arg(QString::number(holeVec[i]->hradius)).arg(0).arg(90).arg(1).arg(1);
+//          qDebug()<<gcodetemp;
+//          textTop->appendPlainText(gcodetemp);
       }
 
       //读取dxf2gcode生成的文件

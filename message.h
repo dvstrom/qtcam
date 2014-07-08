@@ -18,8 +18,8 @@ class message
    // Q_OBJECT
 public:
    // explicit message(QObject *parent = 0);
-    message(quint8 command, QByteArray commarray, quint16 commcrc);
-    message(QString str);
+    message();
+    message(quint8 command1, QByteArray commarray1, quint16 commcrc);
     QByteArray messagearray;
     QByteArray commarray;
     //quint8 messagehead;

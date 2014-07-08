@@ -1,5 +1,6 @@
 #include "gcodeparse.h"
 #include <qdebug.h>
+#include "message.h"
 GcodeParse::GcodeParse(QObject *parent) :
     QObject(parent)
 {
@@ -7,7 +8,9 @@ GcodeParse::GcodeParse(QObject *parent) :
 }
 
 
-void GcodeParse::ParseProcess(QString strline)
+//QVector<message> GcodeParse::ParseProcess(QString strline)
+bool GcodeParse::ParseProcess(QString strline,QVector<message>& mesvec)
+
 {
 //    char buf[20];
 //    while((strline!=NULL)&&(!abort))
@@ -28,7 +31,10 @@ void GcodeParse::ParseProcess(QString strline)
 
 //        }
 //}
+   //  QVector<message> Arraycommmessage;
     int lnum=1;//记录语句中循环的次数
+    //message* commsg;
+    message  commsg;
      qDebug()<<"this is in functuin GcodeParse::ParseProcess() begin";
      bool parseback;
      if ((strline!=NULL)&&(!abort))
@@ -51,7 +57,11 @@ void GcodeParse::ParseProcess(QString strline)
          if(strline.contains("G00",Qt::CaseInsensitive)) //查是否包含q，大小写不敏感
          {
              qDebug()<<"this is the G00 sentence";
-             parseback=G00Parse(strline);
+             commsg=message();
+              parseback=G00Parse(strline,commsg);
+
+             //commsg=G00Parse(strline);
+
          }
          else if(strline.contains("G20",Qt::CaseInsensitive))
          {
@@ -72,7 +82,14 @@ void GcodeParse::ParseProcess(QString strline)
            //当读入的行为空时报错
        }
      qDebug()<<strline;
+     for(int i=0;i<lnum;i++)
+     {
+         mesvec.append(commsg);
+     }
      qDebug()<<"this is in functuin GcodeParse::ParseProcess() end";
+  //   return Arraycommmessage;
+     return  true;
+
 }
 
 void GcodeParse::HandleError(int errnum)
@@ -128,7 +145,8 @@ QString GcodeParse::removeInvalid(QString line)
         return line.trimmed();
 }
 
-bool GcodeParse::G00Parse(QString  parsestr)
+//message* GcodeParse::G00Parse(QString  parsestr)
+bool GcodeParse::G00Parse(QString  parsestr,message &tempmsg)
 {
 //    if (strline.mid(0,3)!="G00")
 //    {
@@ -142,6 +160,8 @@ bool GcodeParse::G00Parse(QString  parsestr)
     qDebug()<<"this is the function G00Parse begin";
     int tempx=0;
     int tempy=0;
+    quint8  tempcom;
+    message* msg;
     parsestr.simplified();//替换内部多个空白
     bool parsex;
     bool parsey;
@@ -160,7 +180,8 @@ bool GcodeParse::G00Parse(QString  parsestr)
     if(components.at(0)!="G00")
     {
         HandleError(2);
-        return 1;
+        return false;
+
     }
 
 
@@ -203,28 +224,44 @@ bool GcodeParse::G00Parse(QString  parsestr)
         if(parsex&&parsey)
         {
              qDebug()<<"the sentence have x and y";
+             tempcom=movexy;
+             QByteArray commandarr1;
+             QDataStream comm(&commandarr1,QIODevice::WriteOnly);
+              comm<<tempx;
+              comm<<tempy;
+              quint16  messagecrc=0;//crc暂时为0
+              msg=new message(tempcom,commandarr1,messagecrc);
         }
-        else
-        {
-            if(parsex)
+        else  if(parsex)
             {
                 qDebug()<<"the sentence have x ";
-
+                tempcom=movex;
+                QByteArray commandarr1;
+                QDataStream comm(&commandarr1,QIODevice::WriteOnly);
+                 comm<<tempx;
+                 quint16  messagecrc=0;//crc暂时为0
+                msg=new message(tempcom,commandarr1,messagecrc);
             }
-            else if(parsey)
+        else if(parsey)
             {
                 qDebug()<<"the sentence have  y";
-
+                tempcom=movey;
+                QByteArray commandarr1;
+                QDataStream comm(&commandarr1,QIODevice::WriteOnly);
+                 comm<<tempy;
+                 quint16  messagecrc=0;//crc暂时为0
+                 msg=new message(tempcom,commandarr1,messagecrc);
             }
-            else
+         else
             {
                qDebug()<<"the sentence wrong";
                 HandleError(4);
+                return false;
             }
-        }
-    qDebug()<<"this is the function G00Parse end";
 
-    return 1;
+    qDebug()<<"this is the function G00Parse end";
+    tempmsg=*msg;
+    return true;
 }
 //没用
 bool GcodeParse::testRegexMatchx(QString testStr)
